@@ -102,6 +102,7 @@ async function initData() {
     }
   } catch (err) {
     console.error("Gagal memuat data dari Supabase, menggunakan LocalStorage:", err);
+    showToast("Gagal memuat database online: " + (err.message || err), "danger");
     loadLocalData();
   }
 }
@@ -141,6 +142,7 @@ async function initProfile() {
     }
   } catch (err) {
     console.error("Gagal memuat profil dari Supabase, menggunakan LocalStorage:", err);
+    showToast("Gagal memuat profil online: " + (err.message || err), "danger");
     loadLocalProfile();
   }
 }
@@ -792,6 +794,7 @@ function setupEventListeners() {
           return; // Exit on success
         } catch (err) {
           console.error("Gagal menyimpan ke database online, menggunakan lokal:", err);
+          showToast("Gagal menyimpan ke cloud: " + (err.message || err), "danger");
         }
       }
 
@@ -856,6 +859,7 @@ function setupEventListeners() {
           if (error) throw error;
         } catch (err) {
           console.error("Gagal menyimpan profil ke database online, menggunakan lokal:", err);
+          showToast("Gagal menyimpan profil ke cloud: " + (err.message || err), "danger");
         }
       }
 
