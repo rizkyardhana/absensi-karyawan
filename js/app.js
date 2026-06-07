@@ -1,11 +1,11 @@
 // Initialize Supabase Client safely
-let supabase = null;
+let supabaseClient = null;
 if (window.supabase) {
   try {
     const { createClient } = window.supabase;
     const supabaseUrl = 'https://qrqrycftkrbvyhuazebv.supabase.co';
     const supabaseKey = 'sb_publishable_UELCHgI4yCcqaNJIhQiJDA_WBWGwflB';
-    supabase = createClient(supabaseUrl, supabaseKey);
+    supabaseClient = createClient(supabaseUrl, supabaseKey);
   } catch (err) {
     console.error("Gagal menginisialisasi Supabase:", err);
   }
@@ -111,17 +111,17 @@ function loadLocalProfile() {
 }
 
 async function syncWithSupabase() {
-  if (!supabase) return;
+  if (!supabaseClient) return;
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('absensi_karyawan')
       .select('*');
       
     if (error) throw error;
     
     if (!data || data.length === 0) {
-      const { error: seedError } = await supabase
+      const { error: seedError } = await supabaseClient
         .from('absensi_karyawan')
         .insert(mockData);
       if (seedError) throw seedError;
@@ -145,7 +145,7 @@ async function syncWithSupabase() {
   }
 
   try {
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabaseClient
       .from('admin_profile')
       .select('*')
       .eq('id', 'admin_default')
@@ -624,9 +624,9 @@ window.confirmDeleteRecord = function(id, name) {
 
 window.executeDeleteRecord = async function() {
   if (recordIdToDelete) {
-    if (supabase) {
+    if (supabaseClient) {
       try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('absensi_karyawan')
           .delete()
           .eq('id', recordIdToDelete);
@@ -779,11 +779,11 @@ function setupEventListeners() {
         return;
       }
 
-      if (supabase) {
+      if (supabaseClient) {
         try {
           if (currentEditId) {
             // UPDATE MODE in Supabase
-            const { error } = await supabase
+            const { error } = await supabaseClient
               .from('absensi_karyawan')
               .update(formData)
               .eq('id', currentEditId);
@@ -802,7 +802,7 @@ function setupEventListeners() {
               id: Date.now().toString(),
               ...formData
             };
-            const { error } = await supabase
+            const { error } = await supabaseClient
               .from('absensi_karyawan')
               .insert(newRecord);
             if (error) throw error;
@@ -872,9 +872,9 @@ function setupEventListeners() {
         return;
       }
 
-      if (supabase) {
+      if (supabaseClient) {
         try {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('admin_profile')
             .upsert({ id: 'admin_default', ...updatedProfile });
           if (error) throw error;
@@ -896,17 +896,17 @@ function setupEventListeners() {
   if (seedBtn) {
     seedBtn.addEventListener("click", async () => {
       if (confirm("Apakah Anda yakin ingin menyetel ulang data ke data simulasi? Seluruh data kustom Anda akan terhapus.")) {
-        if (supabase) {
+        if (supabaseClient) {
           try {
             // Delete all
-            const { error: deleteError } = await supabase
+            const { error: deleteError } = await supabaseClient
                .from('absensi_karyawan')
                .delete()
                .neq('id', '0'); // deletes all
             if (deleteError) throw deleteError;
 
             // Re-insert
-            const { error: seedError } = await supabase
+            const { error: seedError } = await supabaseClient
                .from('absensi_karyawan')
                .insert(mockData);
             if (seedError) throw seedError;
