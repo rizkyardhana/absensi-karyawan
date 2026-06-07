@@ -50,12 +50,15 @@ const mockData = [
 ];
 
 // Document Ready
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   initTheme();
-  await initData();
-  await initProfile();
-  setupEventListeners();
-  handleRouting();
+  initData(); // Loads local fallback instantly
+  initProfile(); // Loads local fallback instantly
+  setupEventListeners(); // Binds UI controls immediately
+  handleRouting(); // Renders active page immediately
+  
+  // Sync with Supabase asynchronously in the background
+  syncWithSupabase();
 });
 
 // Theme Logic
@@ -78,12 +81,38 @@ function initTheme() {
   }
 }
 
-// Data Engine (Supabase & LocalStorage Fallback)
-async function initData() {
-  if (!supabase) {
-    loadLocalData();
-    return;
+// Data Engine (LocalStorage & Supabase background sync)
+function initData() {
+  loadLocalData();
+}
+
+function loadLocalData() {
+  const stored = localStorage.getItem("absensi_karyawan");
+  if (!stored) {
+    localStorage.setItem("absensi_karyawan", JSON.stringify(mockData));
+    attendanceData = [...mockData];
+  } else {
+    attendanceData = JSON.parse(stored);
   }
+}
+
+async function initProfile() {
+  loadLocalProfile();
+}
+
+function loadLocalProfile() {
+  const storedProfile = localStorage.getItem("admin_profile");
+  if (!storedProfile) {
+    localStorage.setItem("admin_profile", JSON.stringify(defaultProfile));
+    profileData = { ...defaultProfile };
+  } else {
+    profileData = JSON.parse(storedProfile);
+  }
+}
+
+async function syncWithSupabase() {
+  if (!supabase) return;
+  
   try {
     const { data, error } = await supabase
       .from('absensi_karyawan')
@@ -100,50 +129,42 @@ async function initData() {
     } else {
       attendanceData = data;
     }
+    
+    localStorage.setItem("absensi_karyawan", JSON.stringify(attendanceData));
+    
+    // Refresh views if the user is currently looking at them
+    const hash = window.location.hash || "#dashboard";
+    if (hash === "#dashboard") {
+      renderDashboard();
+    } else if (hash === "#list") {
+      renderList();
+    }
   } catch (err) {
-    console.error("Gagal memuat data dari Supabase, menggunakan LocalStorage:", err);
+    console.error("Gagal sinkronisasi data dari Supabase:", err);
     showToast("Gagal memuat database online: " + (err.message || err), "danger");
-    loadLocalData();
   }
-}
 
-function loadLocalData() {
-  const stored = localStorage.getItem("absensi_karyawan");
-  if (!stored) {
-    localStorage.setItem("absensi_karyawan", JSON.stringify(mockData));
-    attendanceData = [...mockData];
-  } else {
-    attendanceData = JSON.parse(stored);
-  }
-}
-
-async function initProfile() {
-  if (!supabase) {
-    loadLocalProfile();
-    return;
-  }
   try {
-    const { data, error } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('admin_profile')
       .select('*')
       .eq('id', 'admin_default')
       .single();
       
-    if (error && error.code !== 'PGRST116') throw error;
+    if (profileError && profileError.code !== 'PGRST116') throw profileError;
     
-    if (!data) {
-      const { error: seedError } = await supabase
-        .from('admin_profile')
-        .insert({ id: 'admin_default', ...defaultProfile });
-      if (seedError) throw seedError;
-      profileData = { ...defaultProfile };
-    } else {
-      profileData = data;
+    if (profile) {
+      profileData = profile;
+      localStorage.setItem("admin_profile", JSON.stringify(profileData));
+      
+      const hash = window.location.hash || "#dashboard";
+      if (hash === "#profile") {
+        renderProfile();
+      }
     }
   } catch (err) {
-    console.error("Gagal memuat profil dari Supabase, menggunakan LocalStorage:", err);
+    console.error("Gagal sinkronisasi profil dari Supabase:", err);
     showToast("Gagal memuat profil online: " + (err.message || err), "danger");
-    loadLocalProfile();
   }
 }
 
