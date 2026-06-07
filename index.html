@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Admin Absensi Karyawan - Backstrap</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%234b6cc1' d='M256.12 245.96c-13.25 0-24 10.74-24 24 1.14 72.25-8.14 141.9-27.7 211.55-2.73 9.72 2.15 30.49 23.12 30.49 10.48 0 20.11-6.92 23.09-17.52 13.53-47.91 31.04-125.41 29.48-224.52.01-13.25-10.73-24-23.99-24zm-.86-81.73C194 164.16 151.25 211.3 152.1 265.32c.75 47.94-3.75 95.91-13.37 142.55-2.69 12.98 5.67 25.69 18.64 28.36 13.05 2.67 25.67-5.66 28.36-18.64 10.34-50.09 15.17-101.58 14.37-153.02-.41-25.95 19.92-52.49 54.45-52.34 31.31.47 57.15 25.34 57.62 55.47.77 48.05-2.81 96.33-10.61 143.55-2.17 13.06 6.69 25.42 19.76 27.58 19.97 3.33 26.81-15.1 27.58-19.77 8.28-50.03 12.06-101.21 11.27-152.11-.88-55.8-47.94-101.88-104.91-102.72zm-110.69-19.78c-10.3-8.34-25.37-6.8-33.76 3.48-25.62 31.5-39.39 71.28-38.75 112 .59 37.58-2.47 75.27-9.11 112.05-2.34 13.05 6.31 25.53 19.36 27.89 20.11 3.5 27.07-14.81 27.89-19.36 7.19-39.84 10.5-80.66 9.86-121.33-.47-29.88 9.2-57.88 28-80.97 8.35-10.28 6.79-25.39-3.49-33.76zm109.47-62.33c-15.41-.41-30.87 1.44-45.78 4.97-12.89 3.06-20.87 15.98-17.83 28.89 3.06 12.89 16 20.83 28.89 17.83 11.05-2.61 22.47-3.77 34-3.69 75.43 1.13 137.73 61.5 138.88 134.58.59 37.88-1.28 76.11-5.58 113.63-1.5 13.17 7.95 25.08 21.11 26.58 16.72 1.95 25.51-11.88 26.58-21.11a929.06 929.06 0 0 0 5.89-119.85c-1.56-98.75-85.07-180.33-186.16-181.83zm252.07 121.45c-2.86-12.92-15.51-21.2-28.61-18.27-12.94 2.86-21.12 15.66-18.26 28.61 4.71 21.41 4.91 37.41 4.7 61.6-.11 13.27 10.55 24.09 23.8 24.2h.2c13.17 0 23.89-10.61 24-23.8.18-22.18.4-44.11-5.83-72.34zm-40.12-90.72C417.29 43.46 337.6 1.29 252.81.02 183.02-.82 118.47 24.91 66.86 64.91c-10.74 8.27-12.28 23.53-4.01 34.27 8.28 10.74 23.53 12.28 34.27 4.01 44.59-34.33 100.8-54.85 155.69-54.05 67.24.99 127.35 34.78 164.21 89.25z'/%3E%3C/svg%3E">
+
+  <!-- BackStrap Core CSS (CoreUI & Bootstrap 4 base) -->
+  <link href="https://cdn.jsdelivr.net/npm/@digitallyhappy/backstrap@0.5.1/dist/css/style.min.css" rel="stylesheet">
+
+  <!-- FontAwesome Free Icons (v5) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom Modern Styling -->
+  <link href="css/custom.css" rel="stylesheet">
+</head>
+
+<body class="app header-fixed sidebar-fixed aside-menu-fixed sidebar-lg-show">
+
+  <!-- Main Navbar Header -->
+  <header class="app-header navbar">
+    <!-- Sidebar Toggler Burger for Mobile -->
+    <button class="navbar-toggler sidebar-toggler d-lg-none mr-auto" type="button" id="sidebarTogglerButton">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Branding logo/text -->
+    <a class="navbar-brand" href="#dashboard">
+      <i class="fas fa-fingerprint text-primary mr-2"></i>
+      <span class="font-weight-bold">BackStrap</span>
+      <span class="text-muted font-weight-light text-uppercase ml-1"
+        style="font-size: 10px; letter-spacing: 1px;">Absensi</span>
+    </a>
+
+    <!-- Theme Switcher Toggle (Light/Dark Mode) -->
+    <ul class="nav navbar-nav ml-auto mr-4">
+      <li class="nav-item d-md-down-none">
+        <div class="theme-switch-wrapper">
+          <label class="theme-switch" for="themeToggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+          <span class="theme-icon">
+            <i class="fas fa-moon text-warning"></i>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </header>
+
+  <div class="app-body">
+    <!-- Sidebar Menu Panel -->
+    <div class="sidebar">
+      <nav class="sidebar-nav">
+        <ul class="nav">
+          <li class="nav-title">Menu Utama</li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#dashboard">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#list">
+              <i class="fas fa-users"></i> List Absensi
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#form">
+              <i class="fas fa-user-plus"></i> Input Absen
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#profile">
+              <i class="fas fa-user-circle"></i> Profil Admin
+            </a>
+          </li>
+
+          <li class="nav-title">Database</li>
+
+          <li class="nav-item">
+            <a class="nav-link text-warning" href="javascript:void(0)" id="btnResetSeed">
+              <i class="fas fa-undo-alt"></i> Reset & Seed Data
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Main Content Frame -->
+    <main class="main">
+      <!-- Breadcrumb indicator -->
+      <ol class="breadcrumb"
+        style="background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); border-radius: 0;">
+        <li class="breadcrumb-item">Admin</li>
+        <li class="breadcrumb-item active">Absensi Karyawan</li>
+      </ol>
+
+      <div class="container-fluid">
+        <div class="animated fadeIn">
+
+          <!-- ==================== VIEW 1: DASHBOARD VIEW ==================== -->
+          <div id="dashboardView" class="spa-view active">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="h4 font-weight-bold mb-0">Dashboard Analitik Absensi</h2>
+              <div class="text-muted" style="font-size: 14px;">
+                <i class="far fa-clock mr-1"></i> Rerata Waktu Masuk: <span id="statRerataMasuk"
+                  class="font-weight-bold text-primary">--:--</span>
+              </div>
+            </div>
+
+            <!-- Stats Column Cards Row -->
+            <div class="row">
+              <div class="col-sm-6 col-lg-3">
+                <div class="card text-white bg-primary stat-card mb-4"
+                  style="background: linear-gradient(135deg, #4b6cc1 0%, #35495e 100%) !important; border: none !important;">
+                  <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="text-value-lg h2 font-weight-bold" id="statTotalAbsen">0</div>
+                      <div>Total Absensi</div>
+                    </div>
+                    <i class="fas fa-clipboard-check fa-2x opacity-40"></i>
+                  </div>
+                  <div class="chart-wrapper mt-3" style="height:40px;"></div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-lg-3">
+                <div class="card text-white bg-success stat-card mb-4"
+                  style="background: linear-gradient(135deg, #2ed573 0%, #20bf6b 100%) !important; border: none !important;">
+                  <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="text-value-lg h2 font-weight-bold" id="statHariIni">0</div>
+                      <div>Kehadiran Hari Ini</div>
+                    </div>
+                    <i class="fas fa-calendar-day fa-2x opacity-40"></i>
+                  </div>
+                  <div class="chart-wrapper mt-3" style="height:40px;"></div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-lg-3">
+                <div class="card text-white bg-info stat-card mb-4"
+                  style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important; border: none !important;">
+                  <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="text-value-lg h2 font-weight-bold" id="statLakiLaki">0</div>
+                      <div>Laki-laki</div>
+                    </div>
+                    <i class="fas fa-mars fa-2x opacity-40"></i>
+                  </div>
+                  <div class="chart-wrapper mt-3" style="height:40px;"></div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-lg-3">
+                <div class="card text-white bg-danger stat-card mb-4"
+                  style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important; border: none !important;">
+                  <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="text-value-lg h2 font-weight-bold" id="statPerempuan">0</div>
+                      <div>Perempuan</div>
+                    </div>
+                    <i class="fas fa-venus fa-2x opacity-40"></i>
+                  </div>
+                  <div class="chart-wrapper mt-3" style="height:40px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analytical Chart Graphics -->
+            <div class="row">
+              <div class="col-lg-8">
+                <div class="card mb-4">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-bar mr-2 text-primary"></i>Grafik Kehadiran Harian</span>
+                    <span class="badge badge-secondary">7 Hari Terakhir</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container">
+                      <canvas id="weeklyChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <i class="fas fa-chart-pie mr-2 text-primary"></i>Rasio Gender Karyawan
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container">
+                      <canvas id="genderChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- ==================== VIEW 2: LIST DATA VIEW ==================== -->
+          <div id="listView" class="spa-view">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="h4 font-weight-bold mb-0">Daftar Kehadiran Karyawan</h2>
+              <a href="#form" class="btn btn-primary btn-sm">
+                <i class="fas fa-user-plus mr-1"></i> Tambah Absen Baru
+              </a>
+            </div>
+
+            <div class="card">
+              <!-- Controls and Search Header -->
+              <div class="card-header bg-transparent py-3">
+                <div class="row align-items-center">
+                  <div class="col-md-3 mb-2 mb-md-0">
+                    <div class="d-flex align-items-center">
+                      <span class="text-muted mr-2" style="font-size: 13px; white-space: nowrap;">Tampilkan:</span>
+                      <select class="form-control form-control-sm" id="entriesSelect" style="width: 70px;">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-9">
+                    <div class="search-wrapper float-md-right w-100" style="max-width: 350px;">
+                      <i class="fas fa-search"></i>
+                      <input type="text" id="searchBar" class="form-control form-control-sm"
+                        placeholder="Cari nama atau alamat...">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Table responsive custom -->
+              <div class="table-responsive-custom">
+                <table class="table table-hover table-outline mb-0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="text-center" style="width: 60px;">No</th>
+                      <th class="sortable" data-sort="nama">Nama Karyawan</th>
+                      <th class="sortable" data-sort="alamat">Alamat</th>
+                      <th class="sortable" data-sort="jenis_kelamin" style="width: 140px;">Jenis Kelamin</th>
+                      <th class="sortable" data-sort="tanggal" style="width: 180px;">Tanggal Absen</th>
+                      <th class="sortable" data-sort="jam_masuk" style="width: 140px;">Jam Masuk</th>
+                      <th class="sortable" data-sort="jam_keluar" style="width: 140px;">Jam Keluar</th>
+                      <th class="text-center" style="width: 120px;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attendanceTableBody">
+                    <!-- Loaded dynamically via app.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Table Pagination & Statistics Footer -->
+              <div class="card-footer bg-transparent py-3">
+                <div class="row align-items-center">
+                  <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
+                    <span id="tableInfo" class="text-muted" style="font-size: 13px;">Menampilkan 0 data</span>
+                  </div>
+                  <div class="col-md-6">
+                    <nav class="float-md-right">
+                      <ul class="pagination pagination-sm" id="tablePagination">
+                        <!-- Loaded dynamically via app.js -->
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- ==================== VIEW 3: INPUT/FORM VIEW ==================== -->
+          <div id="formView" class="spa-view">
+            <div class="row justify-content-center">
+              <div class="col-md-8 col-lg-7">
+
+                <!-- Back Link -->
+                <a href="#list" class="btn btn-link px-0 mb-3 text-decoration-none text-muted">
+                  <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Absensi
+                </a>
+
+                <div class="card mb-5">
+                  <div class="card-header">
+                    <i class="fas fa-edit mr-2 text-primary"></i><span id="formTitle">Form Input Data Absensi
+                      Karyawan</span>
+                  </div>
+
+                  <form id="absensiForm">
+                    <div class="card-body">
+                      <!-- Input Nama -->
+                      <div class="form-group mb-3">
+                        <label class="form-label" for="inputNama">Nama Lengkap Karyawan</label>
+                        <input type="text" class="form-control" id="inputNama" placeholder="Contoh: Budi Santoso">
+                      </div>
+
+                      <!-- Input Alamat -->
+                      <div class="form-group mb-3">
+                        <label class="form-label" for="inputAlamat">Alamat Rumah</label>
+                        <textarea class="form-control" id="inputAlamat" rows="3"
+                          placeholder="Contoh: Jl. Merdeka No. 10, Jakarta Pusat"></textarea>
+                      </div>
+
+                      <!-- Input Jenis Kelamin (Gender radio selector cards) -->
+                      <div class="form-group mb-3">
+                        <label class="form-label d-block">Jenis Kelamin</label>
+                        <div class="gender-selector" id="inputGender">
+                          <div class="gender-option">
+                            <input type="radio" id="genderL" name="gender" value="Laki-laki">
+                            <label for="genderL" class="gender-label">
+                              <i class="fas fa-mars text-primary"></i>
+                              <span>Laki-laki</span>
+                            </label>
+                          </div>
+
+                          <div class="gender-option">
+                            <input type="radio" id="genderP" name="gender" value="Perempuan">
+                            <label for="genderP" class="gender-label">
+                              <i class="fas fa-venus text-danger"></i>
+                              <span>Perempuan</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <!-- Input Tanggal Absen -->
+                        <div class="col-md-4 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="inputTanggal">Tanggal Absen</label>
+                            <input type="date" class="form-control" id="inputTanggal">
+                          </div>
+                        </div>
+
+                        <!-- Input Jam Masuk -->
+                        <div class="col-md-4 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="inputJamMasuk">Jam Masuk</label>
+                            <input type="time" class="form-control" id="inputJamMasuk">
+                          </div>
+                        </div>
+
+                        <!-- Input Jam Keluar -->
+                        <div class="col-md-4 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="inputJamKeluar">Jam Keluar</label>
+                            <input type="time" class="form-control" id="inputJamKeluar">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Submit & Cancel Buttons Footer -->
+                    <div class="card-footer bg-transparent py-3 d-flex justify-content-end gap-2" style="gap: 10px;">
+                      <a href="#list" class="btn btn-secondary mr-2">Batal</a>
+                      <button type="submit" class="btn btn-primary" id="btnSubmit">
+                        <i id="btnSubmitIcon" class="fas fa-paper-plane mr-2"></i><span id="btnSubmitText">Simpan
+                          Absen</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== VIEW 4: PROFILE VIEW ==================== -->
+          <div id="profileView" class="spa-view">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="h4 font-weight-bold mb-0">Profil Administrator</h2>
+            </div>
+
+            <div class="row">
+              <!-- Left Column: Profile Card -->
+              <div class="col-md-4 mb-4">
+                <div class="card text-center h-100">
+                  <div class="card-body d-flex flex-column align-items-center justify-content-center py-5">
+                    <div class="profile-avatar-wrapper mb-3">
+                      <div class="profile-avatar" id="profileAvatar">AS</div>
+                    </div>
+                    <h4 class="font-weight-bold mb-1" id="profileCardName">Ahmad Syarifuddin</h4>
+                    <span class="badge badge-primary mb-3" id="profileCardRole">Super Admin</span>
+                    <p class="text-muted small mb-4" id="profileCardBio">Pengelola utama sistem absensi karyawan perusahaan.</p>
+                    
+                    <div class="w-100 border-top pt-3 mt-3">
+                      <div class="row">
+                        <div class="col-6 border-right">
+                          <div class="text-value-sm font-weight-bold text-primary" id="profileStatTotalInput">0</div>
+                          <div class="text-uppercase text-muted small">Total Input</div>
+                        </div>
+                        <div class="col-6">
+                          <div class="text-value-sm font-weight-bold text-success" id="profileStatStatus">Aktif</div>
+                          <div class="text-uppercase text-muted small">Status</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Edit Profile Form -->
+              <div class="col-md-8 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <i class="fas fa-user-edit mr-2 text-primary"></i>Pengaturan Profil
+                  </div>
+                  <form id="profileForm">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="profileNama">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="profileNama" placeholder="Contoh: Ahmad Syarifuddin">
+                          </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="profileNIP">NIP / ID Admin</label>
+                            <input type="text" class="form-control" id="profileNIP" placeholder="Contoh: ADM-2026-001">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="profileEmail">Email</label>
+                            <input type="email" class="form-control" id="profileEmail" placeholder="Contoh: admin@company.com">
+                          </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="profilePhone">Nomor Telepon</label>
+                            <input type="text" class="form-control" id="profilePhone" placeholder="Contoh: 08123456789">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="profileDepartment">Departemen / Divisi</label>
+                            <input type="text" class="form-control" id="profileDepartment" placeholder="Contoh: Human Resource Department (HRD)">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12 mb-3">
+                          <div class="form-group">
+                            <label class="form-label" for="profileBio">Bio Singkat</label>
+                            <textarea class="form-control" id="profileBio" rows="3" placeholder="Tulis bio singkat atau deskripsi peran Anda..."></textarea>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent py-3 d-flex justify-content-end">
+                      <button type="submit" class="btn btn-primary" id="btnSaveProfile">
+                        <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer"
+    style="background-color: var(--bg-card); border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; padding: 15px 30px;">
+    <div>
+      <a href="https://github.com/DigitallyHappy/BackStrap" target="_blank"
+        class="font-weight-bold text-decoration-none">BackStrap Template</a>
+      <span>&copy; 2026 Admin Absensi Karyawan.</span>
+    </div>
+    <div class="ml-auto">
+      <span>Dibuat untuk Tes Teknis Frontend Web Developer.</span>
+    </div>
+  </footer>
+
+  <!-- ==================== DIALOG: DELETE CONFIRMATION MODAL ==================== -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-weight-bold text-danger" id="deleteModalTitle">
+            <i class="fas fa-exclamation-triangle mr-2"></i>Konfirmasi Penghapusan
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Apakah Anda yakin ingin menghapus data absensi untuk karyawan:</p>
+          <div class="p-3 bg-light rounded text-center font-weight-bold h5 text-dark border" id="deleteEmployeeName">
+            -
+          </div>
+          <p class="text-muted mt-2 mb-0" style="font-size: 12px;">Tindakan ini permanen dan data tidak dapat
+            dikembalikan.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-danger" onclick="executeDeleteRecord()">
+            <i class="fas fa-trash-alt mr-1"></i>Hapus Permanen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Float Floating Toast Notifications Container -->
+  <div id="toast-container"></div>
+
+  <!-- Bootstrap, jQuery, Popper.js and Chart.js CDNs -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Core Javascript Application Logic -->
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
