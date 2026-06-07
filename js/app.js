@@ -872,6 +872,7 @@ function setupEventListeners() {
   const burgerBtn = document.getElementById("sidebarTogglerButton");
   if (burgerBtn) {
     burgerBtn.addEventListener("click", () => {
+      document.documentElement.classList.toggle("sidebar-show");
       document.body.classList.toggle("sidebar-show");
     });
   }
@@ -880,6 +881,7 @@ function setupEventListeners() {
   document.querySelectorAll(".sidebar .nav-link").forEach(link => {
     link.addEventListener("click", () => {
       if (window.innerWidth < 992) {
+        document.documentElement.classList.remove("sidebar-show");
         document.body.classList.remove("sidebar-show");
       }
     });
