@@ -1,8 +1,8 @@
-/**
- * Absensi Karyawan Admin Panel - Application Logic
- * Implements CRUD operations, LocalStorage engine, SPA routing, 
- * Pagination, Sorting, Search, Chart.js integrations, and Light/Dark themes.
- */
+// Initialize Supabase Client
+const { createClient } = window.supabase;
+const supabaseUrl = 'https://qrqrycftkrbvyhuazebv.supabase.co';
+const supabaseKey = 'sb_publishable_UELCHgI4yCcqaNJIhQiJDA_WBWGwflB';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Global State
 let attendanceData = [];
@@ -43,10 +43,10 @@ const mockData = [
 ];
 
 // Document Ready
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   initTheme();
-  initData();
-  initProfile();
+  await initData();
+  await initProfile();
   setupEventListeners();
   handleRouting();
 });
@@ -71,24 +71,64 @@ function initTheme() {
   }
 }
 
-// Data Engine (LocalStorage)
-function initData() {
-  const stored = localStorage.getItem("absensi_karyawan");
-  if (!stored) {
-    localStorage.setItem("absensi_karyawan", JSON.stringify(mockData));
-    attendanceData = [...mockData];
-  } else {
-    attendanceData = JSON.parse(stored);
+// Data Engine (Supabase & LocalStorage Fallback)
+async function initData() {
+  try {
+    const { data, error } = await supabase
+      .from('absensi_karyawan')
+      .select('*');
+      
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      const { error: seedError } = await supabase
+        .from('absensi_karyawan')
+        .insert(mockData);
+      if (seedError) throw seedError;
+      attendanceData = [...mockData];
+    } else {
+      attendanceData = data;
+    }
+  } catch (err) {
+    console.error("Gagal memuat data dari Supabase, menggunakan LocalStorage:", err);
+    const stored = localStorage.getItem("absensi_karyawan");
+    if (!stored) {
+      localStorage.setItem("absensi_karyawan", JSON.stringify(mockData));
+      attendanceData = [...mockData];
+    } else {
+      attendanceData = JSON.parse(stored);
+    }
   }
 }
 
-function initProfile() {
-  const storedProfile = localStorage.getItem("admin_profile");
-  if (!storedProfile) {
-    localStorage.setItem("admin_profile", JSON.stringify(defaultProfile));
-    profileData = { ...defaultProfile };
-  } else {
-    profileData = JSON.parse(storedProfile);
+async function initProfile() {
+  try {
+    const { data, error } = await supabase
+      .from('admin_profile')
+      .select('*')
+      .eq('id', 'admin_default')
+      .single();
+      
+    if (error && error.code !== 'PGRST116') throw error;
+    
+    if (!data) {
+      const { error: seedError } = await supabase
+        .from('admin_profile')
+        .insert({ id: 'admin_default', ...defaultProfile });
+      if (seedError) throw seedError;
+      profileData = { ...defaultProfile };
+    } else {
+      profileData = data;
+    }
+  } catch (err) {
+    console.error("Gagal memuat profil dari Supabase, menggunakan LocalStorage:", err);
+    const storedProfile = localStorage.getItem("admin_profile");
+    if (!storedProfile) {
+      localStorage.setItem("admin_profile", JSON.stringify(defaultProfile));
+      profileData = { ...defaultProfile };
+    } else {
+      profileData = JSON.parse(storedProfile);
+    }
   }
 }
 
@@ -123,7 +163,6 @@ function renderProfile() {
 
 function saveData() {
   localStorage.setItem("absensi_karyawan", JSON.stringify(attendanceData));
-  initData(); // Refresh local array
   renderCharts();
   renderDashboard();
 }
@@ -537,8 +576,17 @@ window.confirmDeleteRecord = function(id, name) {
   $("#deleteConfirmModal").modal("show");
 };
 
-window.executeDeleteRecord = function() {
+window.executeDeleteRecord = async function() {
   if (recordIdToDelete) {
+    try {
+      const { error } = await supabase
+        .from('absensi_karyawan')
+        .delete()
+        .eq('id', recordIdToDelete);
+      if (error) throw error;
+    } catch (err) {
+      console.error("Gagal menghapus dari database online, menggunakan lokal:", err);
+    }
     attendanceData = attendanceData.filter(item => item.id !== recordIdToDelete);
     saveData();
     $("#deleteConfirmModal").modal("hide");
@@ -665,7 +713,7 @@ function setupEventListeners() {
   // Form Submission
   const formElement = document.getElementById("absensiForm");
   if (formElement) {
-    formElement.addEventListener("submit", (e) => {
+    formElement.addEventListener("submit", async (e) => {
       e.preventDefault();
       
       const genderEl = document.querySelector('input[name="gender"]:checked');
@@ -683,24 +731,55 @@ function setupEventListeners() {
         return;
       }
 
-      if (currentEditId) {
-        // UPDATE MODE
-        const index = attendanceData.findIndex(item => item.id === currentEditId);
-        if (index !== -1) {
-          attendanceData[index] = { ...attendanceData[index], ...formData };
+      try {
+        if (currentEditId) {
+          // UPDATE MODE in Supabase
+          const { error } = await supabase
+            .from('absensi_karyawan')
+            .update(formData)
+            .eq('id', currentEditId);
+          if (error) throw error;
+
+          const index = attendanceData.findIndex(item => item.id === currentEditId);
+          if (index !== -1) {
+            attendanceData[index] = { ...attendanceData[index], ...formData };
+          }
           saveData();
           showToast(`Data absensi ${formData.nama} berhasil diperbarui!`, "success");
           window.location.hash = "#list";
+        } else {
+          // INSERT MODE in Supabase
+          const newRecord = {
+            id: Date.now().toString(),
+            ...formData
+          };
+          const { error } = await supabase
+            .from('absensi_karyawan')
+            .insert(newRecord);
+          if (error) throw error;
+
+          attendanceData.push(newRecord);
+          saveData();
+          showToast(`Data absensi ${formData.nama} berhasil ditambahkan!`, "success");
+          window.location.hash = "#list";
         }
-      } else {
-        // INSERT MODE
-        const newRecord = {
-          id: Date.now().toString(),
-          ...formData
-        };
-        attendanceData.push(newRecord);
+      } catch (err) {
+        console.error("Gagal menyimpan ke database online, menggunakan lokal:", err);
+        // Fallback to local
+        if (currentEditId) {
+          const index = attendanceData.findIndex(item => item.id === currentEditId);
+          if (index !== -1) {
+            attendanceData[index] = { ...attendanceData[index], ...formData };
+          }
+        } else {
+          const newRecord = {
+            id: Date.now().toString(),
+            ...formData
+          };
+          attendanceData.push(newRecord);
+        }
         saveData();
-        showToast(`Data absensi ${formData.nama} berhasil ditambahkan!`, "success");
+        showToast("Tersimpan secara lokal (offline)", "warning");
         window.location.hash = "#list";
       }
     });
@@ -709,7 +788,7 @@ function setupEventListeners() {
   // Profile Form Submission
   const profileForm = document.getElementById("profileForm");
   if (profileForm) {
-    profileForm.addEventListener("submit", (e) => {
+    profileForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearValidationErrors();
 
@@ -737,6 +816,15 @@ function setupEventListeners() {
         return;
       }
 
+      try {
+        const { error } = await supabase
+          .from('admin_profile')
+          .upsert({ id: 'admin_default', ...updatedProfile });
+        if (error) throw error;
+      } catch (err) {
+        console.error("Gagal menyimpan profil ke database online, menggunakan lokal:", err);
+      }
+
       profileData = updatedProfile;
       localStorage.setItem("admin_profile", JSON.stringify(profileData));
       renderProfile();
@@ -747,13 +835,35 @@ function setupEventListeners() {
   // Reset and Re-seed button in the list or dashboard
   const seedBtn = document.getElementById("btnResetSeed");
   if (seedBtn) {
-    seedBtn.addEventListener("click", () => {
+    seedBtn.addEventListener("click", async () => {
       if (confirm("Apakah Anda yakin ingin menyetel ulang data ke data simulasi? Seluruh data kustom Anda akan terhapus.")) {
-        localStorage.removeItem("absensi_karyawan");
-        initData();
-        saveData();
-        showToast("Database disetel ulang ke data simulasi!", "warning");
-        handleRouting();
+        try {
+          // Delete all
+          const { error: deleteError } = await supabase
+             .from('absensi_karyawan')
+             .delete()
+             .neq('id', '0'); // deletes all
+          if (deleteError) throw deleteError;
+
+          // Re-insert
+          const { error: seedError } = await supabase
+             .from('absensi_karyawan')
+             .insert(mockData);
+          if (seedError) throw seedError;
+
+          localStorage.removeItem("absensi_karyawan");
+          attendanceData = [...mockData];
+          saveData();
+          showToast("Database disetel ulang ke data simulasi!", "warning");
+          handleRouting();
+        } catch (err) {
+          console.error("Gagal mereset database online, mereset secara lokal:", err);
+          localStorage.removeItem("absensi_karyawan");
+          initData();
+          saveData();
+          showToast("Database disetel ulang secara lokal!", "warning");
+          handleRouting();
+        }
       }
     });
   }
