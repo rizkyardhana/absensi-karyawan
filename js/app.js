@@ -1,8 +1,15 @@
-// Initialize Supabase Client
-const { createClient } = window.supabase;
-const supabaseUrl = 'https://qrqrycftkrbvyhuazebv.supabase.co';
-const supabaseKey = 'sb_publishable_UELCHgI4yCcqaNJIhQiJDA_WBWGwflB';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Supabase Client safely
+let supabase = null;
+if (window.supabase) {
+  try {
+    const { createClient } = window.supabase;
+    const supabaseUrl = 'https://qrqrycftkrbvyhuazebv.supabase.co';
+    const supabaseKey = 'sb_publishable_UELCHgI4yCcqaNJIhQiJDA_WBWGwflB';
+    supabase = createClient(supabaseUrl, supabaseKey);
+  } catch (err) {
+    console.error("Gagal menginisialisasi Supabase:", err);
+  }
+}
 
 // Global State
 let attendanceData = [];
@@ -73,6 +80,10 @@ function initTheme() {
 
 // Data Engine (Supabase & LocalStorage Fallback)
 async function initData() {
+  if (!supabase) {
+    loadLocalData();
+    return;
+  }
   try {
     const { data, error } = await supabase
       .from('absensi_karyawan')
@@ -91,17 +102,25 @@ async function initData() {
     }
   } catch (err) {
     console.error("Gagal memuat data dari Supabase, menggunakan LocalStorage:", err);
-    const stored = localStorage.getItem("absensi_karyawan");
-    if (!stored) {
-      localStorage.setItem("absensi_karyawan", JSON.stringify(mockData));
-      attendanceData = [...mockData];
-    } else {
-      attendanceData = JSON.parse(stored);
-    }
+    loadLocalData();
+  }
+}
+
+function loadLocalData() {
+  const stored = localStorage.getItem("absensi_karyawan");
+  if (!stored) {
+    localStorage.setItem("absensi_karyawan", JSON.stringify(mockData));
+    attendanceData = [...mockData];
+  } else {
+    attendanceData = JSON.parse(stored);
   }
 }
 
 async function initProfile() {
+  if (!supabase) {
+    loadLocalProfile();
+    return;
+  }
   try {
     const { data, error } = await supabase
       .from('admin_profile')
@@ -122,13 +141,17 @@ async function initProfile() {
     }
   } catch (err) {
     console.error("Gagal memuat profil dari Supabase, menggunakan LocalStorage:", err);
-    const storedProfile = localStorage.getItem("admin_profile");
-    if (!storedProfile) {
-      localStorage.setItem("admin_profile", JSON.stringify(defaultProfile));
-      profileData = { ...defaultProfile };
-    } else {
-      profileData = JSON.parse(storedProfile);
-    }
+    loadLocalProfile();
+  }
+}
+
+function loadLocalProfile() {
+  const storedProfile = localStorage.getItem("admin_profile");
+  if (!storedProfile) {
+    localStorage.setItem("admin_profile", JSON.stringify(defaultProfile));
+    profileData = { ...defaultProfile };
+  } else {
+    profileData = JSON.parse(storedProfile);
   }
 }
 
@@ -578,14 +601,16 @@ window.confirmDeleteRecord = function(id, name) {
 
 window.executeDeleteRecord = async function() {
   if (recordIdToDelete) {
-    try {
-      const { error } = await supabase
-        .from('absensi_karyawan')
-        .delete()
-        .eq('id', recordIdToDelete);
-      if (error) throw error;
-    } catch (err) {
-      console.error("Gagal menghapus dari database online, menggunakan lokal:", err);
+    if (supabase) {
+      try {
+        const { error } = await supabase
+          .from('absensi_karyawan')
+          .delete()
+          .eq('id', recordIdToDelete);
+        if (error) throw error;
+      } catch (err) {
+        console.error("Gagal menghapus dari database online, menggunakan lokal:", err);
+      }
     }
     attendanceData = attendanceData.filter(item => item.id !== recordIdToDelete);
     saveData();
@@ -731,55 +756,62 @@ function setupEventListeners() {
         return;
       }
 
-      try {
-        if (currentEditId) {
-          // UPDATE MODE in Supabase
-          const { error } = await supabase
-            .from('absensi_karyawan')
-            .update(formData)
-            .eq('id', currentEditId);
-          if (error) throw error;
+      if (supabase) {
+        try {
+          if (currentEditId) {
+            // UPDATE MODE in Supabase
+            const { error } = await supabase
+              .from('absensi_karyawan')
+              .update(formData)
+              .eq('id', currentEditId);
+            if (error) throw error;
 
-          const index = attendanceData.findIndex(item => item.id === currentEditId);
-          if (index !== -1) {
-            attendanceData[index] = { ...attendanceData[index], ...formData };
+            const index = attendanceData.findIndex(item => item.id === currentEditId);
+            if (index !== -1) {
+              attendanceData[index] = { ...attendanceData[index], ...formData };
+            }
+            saveData();
+            showToast(`Data absensi ${formData.nama} berhasil diperbarui!`, "success");
+            window.location.hash = "#list";
+          } else {
+            // INSERT MODE in Supabase
+            const newRecord = {
+              id: Date.now().toString(),
+              ...formData
+            };
+            const { error } = await supabase
+              .from('absensi_karyawan')
+              .insert(newRecord);
+            if (error) throw error;
+
+            attendanceData.push(newRecord);
+            saveData();
+            showToast(`Data absensi ${formData.nama} berhasil ditambahkan!`, "success");
+            window.location.hash = "#list";
           }
-          saveData();
-          showToast(`Data absensi ${formData.nama} berhasil diperbarui!`, "success");
-          window.location.hash = "#list";
-        } else {
-          // INSERT MODE in Supabase
-          const newRecord = {
-            id: Date.now().toString(),
-            ...formData
-          };
-          const { error } = await supabase
-            .from('absensi_karyawan')
-            .insert(newRecord);
-          if (error) throw error;
-
-          attendanceData.push(newRecord);
-          saveData();
-          showToast(`Data absensi ${formData.nama} berhasil ditambahkan!`, "success");
-          window.location.hash = "#list";
+          return; // Exit on success
+        } catch (err) {
+          console.error("Gagal menyimpan ke database online, menggunakan lokal:", err);
         }
-      } catch (err) {
-        console.error("Gagal menyimpan ke database online, menggunakan lokal:", err);
-        // Fallback to local
-        if (currentEditId) {
-          const index = attendanceData.findIndex(item => item.id === currentEditId);
-          if (index !== -1) {
-            attendanceData[index] = { ...attendanceData[index], ...formData };
-          }
-        } else {
-          const newRecord = {
-            id: Date.now().toString(),
-            ...formData
-          };
-          attendanceData.push(newRecord);
+      }
+
+      // Fallback local operations
+      if (currentEditId) {
+        const index = attendanceData.findIndex(item => item.id === currentEditId);
+        if (index !== -1) {
+          attendanceData[index] = { ...attendanceData[index], ...formData };
         }
         saveData();
-        showToast("Tersimpan secara lokal (offline)", "warning");
+        showToast(`Data absensi ${formData.nama} berhasil diperbarui! (Lokal)`, "success");
+        window.location.hash = "#list";
+      } else {
+        const newRecord = {
+          id: Date.now().toString(),
+          ...formData
+        };
+        attendanceData.push(newRecord);
+        saveData();
+        showToast(`Data absensi ${formData.nama} berhasil ditambahkan! (Lokal)`, "success");
         window.location.hash = "#list";
       }
     });
@@ -816,13 +848,15 @@ function setupEventListeners() {
         return;
       }
 
-      try {
-        const { error } = await supabase
-          .from('admin_profile')
-          .upsert({ id: 'admin_default', ...updatedProfile });
-        if (error) throw error;
-      } catch (err) {
-        console.error("Gagal menyimpan profil ke database online, menggunakan lokal:", err);
+      if (supabase) {
+        try {
+          const { error } = await supabase
+            .from('admin_profile')
+            .upsert({ id: 'admin_default', ...updatedProfile });
+          if (error) throw error;
+        } catch (err) {
+          console.error("Gagal menyimpan profil ke database online, menggunakan lokal:", err);
+        }
       }
 
       profileData = updatedProfile;
@@ -837,33 +871,38 @@ function setupEventListeners() {
   if (seedBtn) {
     seedBtn.addEventListener("click", async () => {
       if (confirm("Apakah Anda yakin ingin menyetel ulang data ke data simulasi? Seluruh data kustom Anda akan terhapus.")) {
-        try {
-          // Delete all
-          const { error: deleteError } = await supabase
-             .from('absensi_karyawan')
-             .delete()
-             .neq('id', '0'); // deletes all
-          if (deleteError) throw deleteError;
+        if (supabase) {
+          try {
+            // Delete all
+            const { error: deleteError } = await supabase
+               .from('absensi_karyawan')
+               .delete()
+               .neq('id', '0'); // deletes all
+            if (deleteError) throw deleteError;
 
-          // Re-insert
-          const { error: seedError } = await supabase
-             .from('absensi_karyawan')
-             .insert(mockData);
-          if (seedError) throw seedError;
+            // Re-insert
+            const { error: seedError } = await supabase
+               .from('absensi_karyawan')
+               .insert(mockData);
+            if (seedError) throw seedError;
 
-          localStorage.removeItem("absensi_karyawan");
-          attendanceData = [...mockData];
-          saveData();
-          showToast("Database disetel ulang ke data simulasi!", "warning");
-          handleRouting();
-        } catch (err) {
-          console.error("Gagal mereset database online, mereset secara lokal:", err);
-          localStorage.removeItem("absensi_karyawan");
-          initData();
-          saveData();
-          showToast("Database disetel ulang secara lokal!", "warning");
-          handleRouting();
+            localStorage.removeItem("absensi_karyawan");
+            attendanceData = [...mockData];
+            saveData();
+            showToast("Database disetel ulang ke data simulasi!", "warning");
+            handleRouting();
+            return; // Exit on success
+          } catch (err) {
+            console.error("Gagal mereset database online, mereset secara lokal:", err);
+          }
         }
+
+        // Local fallback
+        localStorage.removeItem("absensi_karyawan");
+        loadLocalData();
+        saveData();
+        showToast("Database disetel ulang secara lokal!", "warning");
+        handleRouting();
       }
     });
   }
